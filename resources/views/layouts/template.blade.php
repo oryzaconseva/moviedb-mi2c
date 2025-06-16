@@ -22,9 +22,10 @@
             </li>
 
             @auth
-              <li class="nav-item">
-                <a class="nav-link" href="{{ route('movies.create') }}">Form Data Movie</a>
-              </li>
+                <li class="nav-item">
+                {{-- Mengubah teks dan tujuan link ke halaman tabel data --}}
+                <a class="nav-link" href="{{ route('movies.index') }}">Data Movie</a>
+                </li>
             @endauth
           </ul>
 

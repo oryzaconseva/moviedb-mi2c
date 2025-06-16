@@ -7,35 +7,38 @@ use App\Http\Middleware\RoleAdmin;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes - Versi Final
+| Web Routes - Versi Final Paling Stabil
 |--------------------------------------------------------------------------
+| Aturan:
+| - Staff: Bisa Tambah & Lihat Detail. Tombol lain non-aktif.
+| - Admin: Bisa Semua.
 */
 
-// == RUTE PUBLIK (TIDAK BUTUH LOGIN) ==
+// == RUTE PUBLIK ==
 Route::get('/', [MovieController::class, 'homepage'])->name('homepage');
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
-// == RUTE BUTUH LOGIN (UMUM UNTUK ADMIN & STAFF) ==
+// == RUTE BUTUH LOGIN (STAFF & ADMIN) ==
 Route::middleware(['auth'])->group(function() {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/movies', [MovieController::class, 'index'])->name('movies.index');
 
-    // Staff BISA Tambah Movie
+    // Rute untuk menampilkan form tambah & memprosesnya
     Route::get('/movies/create', [MovieController::class, 'create'])->name('movies.create');
     Route::post('/movies', [MovieController::class, 'store'])->name('movies.store');
+});
 
-    // Staff BISA Lihat Detail
-    Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.show');
 
-    // Staff BISA Hapus
+// == RUTE AKSI KHUSUS ADMIN SAJA ==
+Route::middleware(['auth', RoleAdmin::class])->group(function () {
+    // Aksi Edit, Update, dan Delete hanya untuk Admin
+    Route::get('/movies/{movie}/edit', [MovieController::class, 'edit'])->name('movies.edit');
+    Route::put('/movies/{movie}', [MovieController::class, 'update'])->name('movies.update');
     Route::delete('/movies/{movie}', [MovieController::class, 'destroy'])->name('movies.destroy');
 });
 
 
-// == RUTE KHUSUS HANYA UNTUK ADMIN (EDIT & UPDATE) ==
-Route::middleware(['auth', RoleAdmin::class])->group(function () {
-    // Staff TIDAK BISA Edit & Update
-    Route::get('/movies/{movie}/edit', [MovieController::class, 'edit'])->name('movies.edit');
-    Route::put('/movies/{movie}', [MovieController::class, 'update'])->name('movies.update');
-});
+// == RUTE DENGAN PARAMETER {MOVIE} DI PALING BAWAH ==
+// Diletakkan di sini untuk menghindari konflik dengan /movies/create
+Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.show');

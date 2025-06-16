@@ -30,23 +30,30 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $movie->title }}</td>
-                        <td>{{ $movie->category->name ?? 'Uncategorized' }}</td>
+                        <td>{{ $movie->category->category_name ?? 'Uncategorized' }}</td>
                         <td>{{ $movie->year }}</td>
                         <td>{{ $movie->actors ?? 'N/A' }}</td>
                         <td>
                             {{-- Tombol Detail (aktif untuk semua) --}}
                             <a href="{{ route('movies.show', $movie->id) }}" class="btn btn-info btn-sm">Detail</a>
 
-                            {{-- INI KUNCINYA: Tombol Edit sekarang menjadi link untuk semua,
-                                 tapi URL-nya akan dilindungi oleh middleware untuk staff --}}
-                            <a href="{{ route('movies.edit', $movie->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                            {{-- Tombol Edit (non-aktif untuk staff) --}}
+                            @if(Auth::user()->role === 'admin')
+                                <a href="{{ route('movies.edit', $movie->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                            @else
+                                <button class="btn btn-warning btn-sm" disabled>Edit</button>
+                            @endif
 
-                            {{-- Tombol Delete (aktif untuk admin dan staff) --}}
-                            <form action="{{ route('movies.destroy', $movie->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Anda yakin ingin menghapus film ini?')">Delete</button>
-                            </form>
+                            {{-- INI PERBAIKANNYA: Tombol Delete juga sekarang non-aktif untuk staff --}}
+                             @if(Auth::user()->role === 'admin')
+                                <form action="{{ route('movies.destroy', $movie->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Anda yakin?')">Delete</button>
+                                </form>
+                            @else
+                                <button class="btn btn-danger btn-sm" disabled>Delete</button>
+                            @endif
                         </td>
                     </tr>
                 @endforeach
